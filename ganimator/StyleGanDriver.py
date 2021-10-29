@@ -1,7 +1,6 @@
 import pickle
 import torch
 import torch_utils
-from torch_utils import persi
 import ganimator
 
 
