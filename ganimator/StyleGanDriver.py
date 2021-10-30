@@ -24,10 +24,8 @@ class StyleGanDriver(ganimator.IDriver):
             self.device = torch.device('cuda')
             self.G = pickle.load(f)['G_ema'].cuda()  # torch.nn.Module
 
-    def get_z_dim(self):
-        """ Return dimension of z latent space
-            @todo Do we need this?
-        """
+    def get_z_dim(self) -> int:
+        """ Return dimension of z latent space """
         return self.G.z_dim
 
     def generate_image(self):
