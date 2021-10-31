@@ -68,22 +68,30 @@ class StyleGanDriver(IDriver):
 
         return np.linalg.inv(matrix)
 
-    def generate_image(self, z=None, label_id=None, trunc=1, translate=(0, 0), rotate=0, noise_mode='const'):
-        """
-        noise_mode: 'const', 'random', 'none'
-        """
-
+    def generate_image(
+            self,
+            z: np.ndarray = None,
+            label_id=None,
+            trunc: float = 1,
+            translate: Tuple[float, float] = (0, 0),
+            rotate: float = 0,
+            noise_mode='const'  # 'const', 'random', 'none'
+    ):
         # Labels
         # TODO: Prepare `torch.zeros([1, self.G.c_dim], device=self.device)` in the constructor. Here just copy pepared zeros.
         label = torch.zeros([1, self.G.c_dim], device=self.device)
         if self.G.c_dim != 0:
             label[:, label_id] = 1
 
-        # If applicable, perform the transformation
+        # If applicable perform the translate/rotate transformation
         if hasattr(self.G.synthesis, 'input'):
-            m = self._make_transform_matrix(translate, rotate)
-            self.G.synthesis.input.transform.copy_(torch.from_numpy(m))
+            # m = self._make_transform_matrix(translate, rotate)
+            # self.G.synthesis.input.transform.copy_(torch.from_numpy(m))
+            self.G.synthesis.input.transform.copy_(torch.from_numpy(
+                self._make_transform_matrix(translate, rotate)
+            ))
 
-        img = self.G(z, label, truncation_psi=trunc, noise_mode=noise_mode)
+        z_tensor = torch.from_numpy(z).to(self.device)  # torch.Tensor
+        img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
         return PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
