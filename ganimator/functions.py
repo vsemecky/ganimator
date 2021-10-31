@@ -4,11 +4,15 @@ import sys
 
 import time
 from datetime import datetime
+
+import PIL
 import numpy as np
 from PIL import Image, ImageFont, ImageDraw
 import progressbar
 from matplotlib import font_manager
 from moviepy.editor import *
+from typing import Tuple
+
 from . import IDriver
 
 #
@@ -111,8 +115,17 @@ def line_interpolate(zs, steps):
     return out
 
 
-def generate_image(driver: IDriver, seed: int = 42, trunc: float = 1, randomize_noise: bool = False) -> Image:
-    pass
+def generate_image(
+        gan: IDriver,
+        seed: int = 42,
+        label_id=None,
+        trunc: float = 1,
+        translate: Tuple[float, float] = (0, 0),
+        rotate: float = 0,
+        noise_mode='const'  # 'const', 'random', 'none'
+        ) -> PIL.Image:
+    z = gan.seed_to_z(seed)
+    return gan.generate_image(z, label_id=label_id, trunc=trunc, translate=translate, rotate=rotate, noise_mode=noise_mode)
 
 
 def generate_image_tf(pkl: str, seed: int = 42, trunc: float = 1, randomize_noise: bool = False) -> Image:

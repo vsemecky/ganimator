@@ -16,7 +16,7 @@ class StaticImageClip(ImageClip):
 
     def __init__(
             self,
-            pkl: str,
+            gan: IDriver,
             duration: int = 30,
             seed: int = 42,
             trunc: float = 1,
@@ -24,7 +24,7 @@ class StaticImageClip(ImageClip):
             title=None,
             title_font_size=None,
     ):
-        pil_image = generate_image(pkl=pkl, seed=seed, trunc=trunc, randomize_noise=randomize_noise)
+        pil_image = generate_image(gan=gan, seed=seed, trunc=trunc, randomize_noise=randomize_noise)
 
         if title is not None:
             # Append title text
