@@ -122,7 +122,8 @@ def generate_image(
         trunc: float = 1,
         translate: Tuple[float, float] = (0, 0),
         rotate: float = 0,
-        noise_mode='const'  # 'const', 'random', 'none'
+        noise_mode='const',  # 'const', 'random', 'none'
+        **kwargs
         ) -> PIL.Image:
     z = gan.seed_to_z(seed)
     return gan.generate_image(z, label_id=label_id, trunc=trunc, translate=translate, rotate=rotate, noise_mode=noise_mode)
