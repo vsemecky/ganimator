@@ -10,9 +10,10 @@ import numpy as np
 import PIL.Image
 import torch
 import legacy
+from . import IDriver
 
 
-class StyleGanDriver(ganimator.IDriver):
+class StyleGanDriver(IDriver):
     """
     This driver connects Ganimator to StyleGan networks based on the original Nvidia implementations.
 
