@@ -24,39 +24,36 @@ class StyleGanDriver(IDriver):
         :type path: str Filename or URL
         :type cache_dir: str Local path do cache dir
         """
-        self.device = torch.device('cuda')
         print(f'Loading networks from {pkl}')
+        self.device = torch.device('cuda')
         with dnnlib.util.open_url(pkl, cache_dir=cache_dir) as f:
             self.G = legacy.load_network_pkl(f)['G_ema'].to(self.device)
             self.z_dim = self.G.z_dim
             self.is_conditional = (self.G.c_dim != 0)
 
-        # with open(path, 'rb') as f:
-        #     self.G = pickle.load(f)['G_ema'].cuda()  # torch.nn.Module
-
-    def get_z_dim(self) -> int:
-        """ Return dimension of z latent space """
-        return self.G.z_dim
-
     def seed_to_z(self, seed: int):
-        """ Experiment"""
-        # z = torch.randn([seed, self.G.z_dim]).cuda()
-        z = torch.from_numpy(
-            np.random.RandomState(seed).randn(1, self.G.z_dim)
-        ).to(self.device)
+        z_np = np.random.RandomState(seed).randn(1, self.z_dim)
+        return z_np
 
-        return z
+    def seed_to_z_torch(self, seed: int):
+        z_tensor = torch.from_numpy(
+            self.seed_to_z(seed)
+        ).to(self.device)
+        return z_tensor
+
+    def seed_to_z_torch_direct(self, seed: int):
+        z_tensor = torch.from_numpy(self.seed_to_z(seed)).to(self.device)
+        return z_tensor
 
     @staticmethod
-    def _make_transform_matrix(translate: Tuple[float, float], rotate: float):
+    def _make_transform_matrix(translate: Tuple[float, float], rotate: float) -> torch.Tensor:
         """
         Construct an rotation/translation matrix to pass to the generator.
         The generator expects this matrix as an inverse to avoid potentially failing
         numerical operations in the network.
         """
         matrix = np.eye(3)
-        # rotate_rad = rotate / 360.0 * np.pi * 2  # Convert degrees to radians
-        rotate_rad = rotate * np.pi / 180  # Convert degrees to radians
+        rotate_rad = rotate * np.pi / 180  # degrees => radians
         sinus = np.sin(rotate_rad)
         cosinus = np.cos(rotate_rad)
         matrix[0][0] = cosinus
@@ -85,13 +82,11 @@ class StyleGanDriver(IDriver):
 
         # If applicable perform the translate/rotate transformation
         if hasattr(self.G.synthesis, 'input'):
-            # m = self._make_transform_matrix(translate, rotate)
-            # self.G.synthesis.input.transform.copy_(torch.from_numpy(m))
             self.G.synthesis.input.transform.copy_(torch.from_numpy(
                 self._make_transform_matrix(translate, rotate)
             ))
 
-        z_tensor = torch.from_numpy(z).to(self.device)  # torch.Tensor
+        z_tensor = torch.from_numpy(z).to(self.device)  # np.ndarray => torch.Tensor
         img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
         return PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
