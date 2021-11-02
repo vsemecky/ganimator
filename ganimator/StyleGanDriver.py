@@ -18,7 +18,7 @@ class StyleGanDriver(IDriver):
         - including non-square networks trained using SkyFlyNill/StyleGan2 or RoyWheels/StyleGan2-Ada
     """
 
-    def __init__(self, pkl: str, cache_dir: str = None):
+    def __init__(self, pkl: str, path: str, cache_dir: str = None):
         """
         Loads network into memory
         :type path: str Filename or URL
@@ -28,22 +28,40 @@ class StyleGanDriver(IDriver):
         self.device = torch.device('cuda')
         with dnnlib.util.open_url(pkl, cache_dir=cache_dir) as f:
             self.G = legacy.load_network_pkl(f)['G_ema'].to(self.device)
-            self.z_dim = self.G.z_dim
-            self.is_conditional = (self.G.c_dim != 0)
 
-    def seed_to_z(self, seed: int):
-        z_np = np.random.RandomState(seed).randn(1, self.z_dim)
-        return z_np
+        super().__init__(
+            path=path,
+            z_dim=self.G.z_dim,
+            is_conditional=(self.G.c_dim != 0)
+        )
 
-    def seed_to_z_torch(self, seed: int):
-        z_tensor = torch.from_numpy(
-            self.seed_to_z(seed)
-        ).to(self.device)
-        return z_tensor
+    def generate_image(
+            self,
+            z: np.ndarray = None,
+            label_id=None,
+            trunc: float = 1,
+            translate: Tuple[float, float] = (0, 0),
+            rotate: float = 0,
+            noise_mode='const',
+            **kwargs
+    ):
+        # Labels
+        # TODO: Prepare `torch.zeros([1, self.G.c_dim], device=self.device)` in the constructor. Here just copy pepared zeros.
+        label = torch.zeros([1, self.G.c_dim], device=self.device)
+        if self.G.c_dim != 0:
+            label[:, label_id] = 1
 
-    def seed_to_z_torch_direct(self, seed: int):
-        z_tensor = torch.from_numpy(self.seed_to_z(seed)).to(self.device)
-        return z_tensor
+        # If applicable perform the translate/rotate transformation
+        if hasattr(self.G.synthesis, 'input'):
+            self.G.synthesis.input.transform.copy_(torch.from_numpy(
+                self._make_transform_matrix(translate, rotate)
+            ))
+
+        z = np.expand_dims(z, axis=0)  # shape [512] => [512x1]
+        z_tensor = torch.from_numpy(z).to(self.device)  # np.ndarray => torch.Tensor
+        img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)
+        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
+        return PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
 
     @staticmethod
     def _make_transform_matrix(translate: Tuple[float, float], rotate: float) -> torch.Tensor:
@@ -64,29 +82,3 @@ class StyleGanDriver(IDriver):
         matrix[1][2] = translate[1]
 
         return np.linalg.inv(matrix)
-
-    def generate_image(
-            self,
-            z: np.ndarray = None,
-            label_id=None,
-            trunc: float = 1,
-            translate: Tuple[float, float] = (0, 0),
-            rotate: float = 0,
-            noise_mode='const'  # 'const', 'random', 'none'
-    ):
-        # Labels
-        # TODO: Prepare `torch.zeros([1, self.G.c_dim], device=self.device)` in the constructor. Here just copy pepared zeros.
-        label = torch.zeros([1, self.G.c_dim], device=self.device)
-        if self.G.c_dim != 0:
-            label[:, label_id] = 1
-
-        # If applicable perform the translate/rotate transformation
-        if hasattr(self.G.synthesis, 'input'):
-            self.G.synthesis.input.transform.copy_(torch.from_numpy(
-                self._make_transform_matrix(translate, rotate)
-            ))
-
-        z_tensor = torch.from_numpy(z).to(self.device)  # np.ndarray => torch.Tensor
-        img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)
-        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        return PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
