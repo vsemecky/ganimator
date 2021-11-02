@@ -18,15 +18,15 @@ class StyleGanDriver(IDriver):
         - including non-square networks trained using SkyFlyNill/StyleGan2 or RoyWheels/StyleGan2-Ada
     """
 
-    def __init__(self, pkl: str, path: str, cache_dir: str = None):
+    def __init__(self, path: str, cache_dir: str = None):
         """
         Loads network into memory
         :type path: str Filename or URL
         :type cache_dir: str Local path do cache dir
         """
-        print(f'Loading networks from {pkl}')
+        print(f'Loading networks from {path}')
         self.device = torch.device('cuda')
-        with dnnlib.util.open_url(pkl, cache_dir=cache_dir) as f:
+        with dnnlib.util.open_url(path, cache_dir=cache_dir) as f:
             self.G = legacy.load_network_pkl(f)['G_ema'].to(self.device)
 
         super().__init__(
