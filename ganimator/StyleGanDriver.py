@@ -61,7 +61,8 @@ class StyleGanDriver(IDriver):
         z_tensor = torch.from_numpy(z).to(self.device)  # np.ndarray => torch.Tensor
         img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        return PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
+        # return PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
+        return img
 
     @staticmethod
     def _make_transform_matrix(translate: Tuple[float, float], rotate: float) -> torch.Tensor:

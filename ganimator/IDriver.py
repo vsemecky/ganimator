@@ -13,7 +13,7 @@ class IDriver:
 
     def seed_to_z(self, seed: int):
         """ Converts seed to vector in the z latent space """
-        z_np = np.random.RandomState(seed).randn(self.z_dim)
+        z_np = np.random.RandomState(seed).randn(1, self.z_dim)
         return z_np
 
     def generate_image(
@@ -25,5 +25,5 @@ class IDriver:
             rotate: float = 0,
             noise_mode='const',  # 'const', 'random', 'none'
             ** kwargs
-    ) -> PIL.Image:
+    ):
         raise NotImplementedError("Method hasn't been implemented yet.")
