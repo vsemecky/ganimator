@@ -66,8 +66,8 @@ class LatentWalkClip(VideoClip):
             latents = all_latents[frame_idx]
             # latents = np.expand_dims(latents, axis=0)
             # print(frame_idx, latents)
-            image = np.array(gan.generate_image(latents, trunc=trunc))
-            return image
+            image_np = gan.generate_image(latents, trunc=trunc)
+            return image_np
 
         # Create VideoClip
         super().__init__(make_frame=make_frame, duration=duration)
