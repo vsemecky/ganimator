@@ -42,50 +42,32 @@ class LatentWalkClip(VideoClip):
 
     def __init__(
             self,
-            pkl: str,
+            gan: IDriver,
             duration: int = 30,
+            fps: int = 30,
             seed: int = 42,
             trunc: float = 1.0,
-            randomize_noise: bool = False,
             smoothing_sec: float = 1.0,
-            fps: int = 30,
             title=None,
             title_font_size=None,
     ):
-        # Nepouzivane parametry z puvodni funkce
-        grid_size = [1, 1]
-        tflib.init_tf()
-        Gs = load_network_Gs(pkl)
-        height, width = Gs.output_shape[2:]
-        fmt = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
-
-        num_frames = int(np.rint(duration * fps))
+        num_frames = duration * fps
         random_state = np.random.RandomState(seed)
 
         # Generating latent vectors
-        shape = [num_frames, np.prod(grid_size)] + Gs.input_shape[1:]  # [frame, image, channel, component]
+        shape = [num_frames, gan.z_dim]  # [frame, component]
         all_latents = random_state.randn(*shape).astype(np.float32)
-        all_latents = scipy.ndimage.gaussian_filter(all_latents, [smoothing_sec * fps] + [0] * len(Gs.input_shape), mode='wrap')
+        all_latents = scipy.ndimage.gaussian_filter(all_latents, [smoothing_sec * fps] + [0], mode='wrap')
         all_latents /= np.sqrt(np.mean(np.square(all_latents)))
-        if title is not None:
-            title_font_size = title_font_size or height // 32
-            title_font = get_image_font(family='sans-serif', weight='normal', size=title_font_size)
 
         def make_frame(t):
             """ Frame generation func for MoviePy """
             frame_idx = int(np.clip(np.round(t * fps), 0, num_frames - 1))
             latents = all_latents[frame_idx]
-            images = Gs.run(latents, None, truncation_psi=trunc, randomize_noise=randomize_noise, output_transform=fmt)
-            image = images[0]
-            if title is None:
-                return image
-
-            # Append title text
-            pil_image = Image.fromarray(image)
-            draw = ImageDraw.Draw(pil_image, 'RGBA')  # RGBA because of semitransparent rectangle arount the title
-            draw_text(draw=draw, image=pil_image, font=title_font, text=title, gravity="South", fill=(0, 0, 0, 200), margin=height // 64, padding=title_font_size // 5)
-
-            return np.array(pil_image)
+            # latents = np.expand_dims(latents, axis=0)
+            # print(frame_idx, latents)
+            image = np.array(gan.generate_image(latents, trunc=trunc))
+            return image
 
         # Create VideoClip
         super().__init__(make_frame=make_frame, duration=duration)
