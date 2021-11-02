@@ -126,7 +126,9 @@ def generate_image(
         **kwargs
         ) -> PIL.Image:
     z = gan.seed_to_z(seed)
-    return gan.generate_image(z, label_id=label_id, trunc=trunc, translate=translate, rotate=rotate, noise_mode=noise_mode)
+    image_np = gan.generate_image(z, label_id=label_id, trunc=trunc, translate=translate, rotate=rotate, noise_mode=noise_mode)
+    image_pil = PIL.Image.fromarray(image_np, 'RGB')
+    return image_pil
 
 
 def generate_image_tf(pkl: str, seed: int = 42, trunc: float = 1, randomize_noise: bool = False) -> Image:
