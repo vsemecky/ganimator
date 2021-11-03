@@ -1,13 +1,11 @@
 import sys
 
 # Allow import from git submodules
-sys.path.append("./submodules/stylegan2-ada/")
+# sys.path.append("./submodules/stylegan2-ada/")
 
 import glob
 import re
 import scipy
-from PIL import Image, ImageFont, ImageDraw
-from moviepy.editor import *
 from .functions import *
 
 
