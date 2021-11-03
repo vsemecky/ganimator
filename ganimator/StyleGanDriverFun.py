@@ -48,7 +48,7 @@ class StyleGanDriverFun(StyleGanDriver):
         ))
         img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)  # Generate image
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)  # Some magic (???)
-        img1_np = img[0].cpu().numpy()
+        img_left_np = img[0].cpu().numpy()
 
         # Image right
         self.G.synthesis.input.transform.copy_(torch.from_numpy(
@@ -56,7 +56,7 @@ class StyleGanDriverFun(StyleGanDriver):
         ))
         img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)  # Generate image
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)  # Some magic (???)
-        img2_np = img[0].cpu().numpy()
+        img_right_np = img[0].cpu().numpy()
 
         # Concat images left+right
-        return np.concatenate((img1_np, img2_np), axis=1)
+        return np.concatenate((img_left_np, img_right_np), axis=1)
