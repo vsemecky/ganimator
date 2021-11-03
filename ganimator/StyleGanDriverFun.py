@@ -60,23 +60,3 @@ class StyleGanDriverFun(StyleGanDriver):
 
         # Concat images left+right
         return np.concatenate((img1_np, img2_np), axis=1)
-
-    @staticmethod
-    def _make_transform_matrix(translate: Tuple[float, float], rotate: float) -> torch.Tensor:
-        """
-        Construct an rotation/translation matrix to pass to the generator.
-        The generator expects this matrix as an inverse to avoid potentially failing
-        numerical operations in the network.
-        """
-        matrix = np.eye(3)
-        rotate_rad = rotate * np.pi / 180  # degrees => radians
-        sinus = np.sin(rotate_rad)
-        cosinus = np.cos(rotate_rad)
-        matrix[0][0] = cosinus
-        matrix[0][1] = sinus
-        matrix[0][2] = translate[0]
-        matrix[1][0] = -sinus
-        matrix[1][1] = cosinus
-        matrix[1][2] = translate[1]
-
-        return np.linalg.inv(matrix)
