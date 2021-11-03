@@ -44,7 +44,7 @@ class StyleGanDriverFun(StyleGanDriver):
 
         # Image left
         self.G.synthesis.input.transform.copy_(torch.from_numpy(
-            self._make_transform_matrix((-0.5, 0), rotate)
+            self._make_transform_matrix((0.5, 0), rotate)
         ))
         img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)  # Generate image
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)  # Some magic (???)
@@ -52,7 +52,7 @@ class StyleGanDriverFun(StyleGanDriver):
 
         # Image right
         self.G.synthesis.input.transform.copy_(torch.from_numpy(
-            self._make_transform_matrix((0.5, 0), rotate)
+            self._make_transform_matrix((-0.5, 0), rotate)
         ))
         img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)  # Generate image
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)  # Some magic (???)
