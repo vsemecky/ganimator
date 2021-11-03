@@ -59,9 +59,8 @@ class StyleGanDriver(IDriver):
 
         z = np.expand_dims(z, axis=0)  # shape [512] => [512x1]
         z_tensor = torch.from_numpy(z).to(self.device)  # np.ndarray => torch.Tensor
-        img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)
-        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        # return PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
+        img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)  # Generate image
+        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)  # Some magic (???)
         return img[0].cpu().numpy()
 
     @staticmethod

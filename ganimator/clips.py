@@ -17,12 +17,12 @@ class StaticImageClip(ImageClip):
             gan: IDriver,
             duration: int = 30,
             seed: int = 42,
+            label_id=None,
             trunc: float = 1,
-            randomize_noise: bool = False,
             title=None,
             title_font_size=None,
     ):
-        pil_image = generate_image(gan=gan, seed=seed, trunc=trunc, randomize_noise=randomize_noise)
+        pil_image = generate_image(gan=gan, seed=seed, label_id=label_id, trunc=trunc)
 
         if title is not None:
             # Append title text
@@ -44,6 +44,7 @@ class LatentWalkClip(VideoClip):
             duration: int = 30,
             fps: int = 30,
             seed: int = 42,
+            label_id=None,
             trunc: float = 1.0,
             smoothing_sec: float = 1.0,
             title=None,
@@ -62,9 +63,7 @@ class LatentWalkClip(VideoClip):
             """ Frame generation func for MoviePy """
             frame_idx = int(np.clip(np.round(t * fps), 0, num_frames - 1))
             latents = all_latents[frame_idx]
-            # latents = np.expand_dims(latents, axis=0)
-            # print(frame_idx, latents)
-            image_np = gan.generate_image(latents, trunc=trunc)
+            image_np = gan.generate_image(latents, trunc=trunc, label_id=label_id)
             return image_np
 
         # Create VideoClip
@@ -170,18 +169,16 @@ class ArrayClip(CompositeVideoClip):
 
 
 class TruncComparisonClip(ArrayClip):
-    """  """
+    """  Truncation psi comparison clip """
 
     def __init__(
             self,
-            pkl=None,
+            gan: IDriver,
             grid=(3, 2),  # (cols, rows)
             trunc_range=(0.0, 1.0),  # (trunc_min, trunc_max)
             fps=30,  # frames per second
-            duration=10,  # Duration in seconds
+            duration=30,  # Duration in seconds
             smoothing_sec=1.0,
-            randomize_noise=False,
-            caption=True,  # Display truncation psi at the bottom if each image
             seed=420  # Starting seed of the first image
     ):
         cols, rows = grid
@@ -199,21 +196,19 @@ class TruncComparisonClip(ArrayClip):
                 height = 768  # temporary hack (until drivers will be done)
                 if trunc == 0:  # Save some time: Truncation psi=0 generates allways the same average image.
                     clips[row][col] = StaticImageClip(
-                        pkl=pkl,
+                        gan=gan,
                         seed=seed,
                         trunc=trunc,
                         duration=duration,
-                        randomize_noise=randomize_noise,
                         title="psi 0.0",
                         title_font_size=rows * height // 32,
                     )
                 else:
                     clips[row][col] = LatentWalkClip(
-                        pkl=pkl,
+                        gan=gan,
                         seed=seed,
                         trunc=trunc,
                         duration=duration,
-                        randomize_noise=randomize_noise,
                         smoothing_sec=smoothing_sec,
                         fps=fps,
                         title="psi " + str(round(trunc, 2)),
