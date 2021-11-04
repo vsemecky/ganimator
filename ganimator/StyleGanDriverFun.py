@@ -53,7 +53,28 @@ class StyleGanDriverFun(StyleGanDriver):
                 self.generate_subimage(z_tensor, translate=(0, -0.5), label_tensor=label, trunc=trunc, rotate=rotate, noise=noise_mode)
             ), axis=0)
 
+        # Crop
+        image_np = self.np_center_crop(image_np)
+
         return image_np
+
+    def np_center_crop(self, img_np):
+        height, width, channel = img_np.shape
+
+        if self.ratio > 1:
+            new_width = 2 * int(height * self.ratio / 2)  # round to odd
+            new_height = height
+        else:
+            new_width = width
+            new_height = 2 * int(width * self.ratio / 2)  # round to odd
+
+        print(f"{width}x{height} => {new_width}x{new_height}")
+        assert new_width <= width, "new width > original width"
+        assert new_height <= height, "new height > original height"
+
+        x = width // 2 - (new_width // 2)
+        y = height // 2 - (new_height // 2)
+        return img_np[y: y + new_height, x: x + new_width]
 
     def generate_subimage(
             self,
