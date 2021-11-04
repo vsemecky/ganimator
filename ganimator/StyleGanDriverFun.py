@@ -42,21 +42,31 @@ class StyleGanDriverFun(StyleGanDriver):
         z = np.expand_dims(z, axis=0)  # shape [512] => [512x1]
         z_tensor = torch.from_numpy(z).to(self.device)  # np.ndarray => torch.Tensor
 
-        # Image left
-        self.G.synthesis.input.transform.copy_(torch.from_numpy(
-            self._make_transform_matrix((0.5, 0), rotate)
-        ))
-        img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)  # Generate image
-        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)  # Some magic (???)
-        img_left_np = img[0].cpu().numpy()
+        if self.ratio > 1:
+            image_np = np.concatenate((
+                self.generate_subimage(z_tensor, translate=(0.5, 0), label_tensor=label, trunc=trunc, rotate=rotate, noise=noise_mode),
+                self.generate_subimage(z_tensor, translate=(-0.5, 0), label_tensor=label, trunc=trunc, rotate=rotate, noise=noise_mode)
+            ), axis=1)
+        else:
+            image_np = np.concatenate((
+                self.generate_subimage(z_tensor, translate=(0, 0.5), label_tensor=label, trunc=trunc, rotate=rotate, noise=noise_mode),
+                self.generate_subimage(z_tensor, translate=(0, -0.5), label_tensor=label, trunc=trunc, rotate=rotate, noise=noise_mode)
+            ), axis=0)
 
-        # Image right
-        self.G.synthesis.input.transform.copy_(torch.from_numpy(
-            self._make_transform_matrix((-0.5, 0), rotate)
-        ))
-        img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)  # Generate image
-        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)  # Some magic (???)
-        img_right_np = img[0].cpu().numpy()
+        return image_np
 
-        # Concat images left+right
-        return np.concatenate((img_left_np, img_right_np), axis=1)
+    def generate_subimage(
+            self,
+            z_tensor,
+            label_tensor = None,
+            trunc: float = 1,
+            translate: Tuple[float, float] = (0, 0),
+            rotate: float = 0,
+            noise ='const'
+    ):
+        self.G.synthesis.input.transform.copy_(torch.from_numpy(
+            self._make_transform_matrix(translate, rotate)
+        ))
+        img = self.G(z_tensor, label_tensor, truncation_psi=trunc, noise_mode=noise)  # Generate image
+        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)  # Some magic (???)
+        return img[0].cpu().numpy()
