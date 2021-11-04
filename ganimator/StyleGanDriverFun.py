@@ -66,7 +66,7 @@ class StyleGanDriverFun(StyleGanDriver):
             new_height = height
         else:
             new_width = width
-            new_height = 2 * int(width * self.ratio / 2)  # round to odd
+            new_height = 2 * int(width / self.ratio / 2)  # round to odd
 
         print(f"{width}x{height} => {new_width}x{new_height}")
         assert new_width <= width, "new width > original width"
