@@ -9,6 +9,7 @@ from . import StyleGanDriver
 
 class StyleGanDriverFun(StyleGanDriver):
     """
+    Experiment
     """
 
     def __init__(self, path: str, cache_dir: str = None, ratio: float = 1 / 1):
@@ -62,15 +63,11 @@ class StyleGanDriverFun(StyleGanDriver):
         height, width, channel = img_np.shape
 
         if self.ratio > 1:
-            new_width = 2 * int(height * self.ratio / 2)  # round to odd
+            new_width = 2 * int(height * self.ratio / 2)  # round to even
             new_height = height
         else:
             new_width = width
-            new_height = 2 * int(width / self.ratio / 2)  # round to odd
-
-        print(f"{width}x{height} => {new_width}x{new_height}")
-        assert new_width <= width, "new width > original width"
-        assert new_height <= height, "new height > original height"
+            new_height = 2 * int(width / self.ratio / 2)  # round to even
 
         x = width // 2 - (new_width // 2)
         y = height // 2 - (new_height // 2)
@@ -79,11 +76,11 @@ class StyleGanDriverFun(StyleGanDriver):
     def generate_subimage(
             self,
             z_tensor,
-            label_tensor = None,
+            label_tensor,
             trunc: float = 1,
             translate: Tuple[float, float] = (0, 0),
             rotate: float = 0,
-            noise ='const'
+            noise='const'
     ):
         self.G.synthesis.input.transform.copy_(torch.from_numpy(
             self._make_transform_matrix(translate, rotate)
