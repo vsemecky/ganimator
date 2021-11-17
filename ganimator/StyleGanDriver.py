@@ -32,6 +32,7 @@ class StyleGanDriver(IDriver):
         super().__init__(
             path=path,
             z_dim=self.G.z_dim,
+            c_dim=self.G.c_dim,
             is_conditional=(self.G.c_dim != 0)
         )
 
@@ -40,9 +41,9 @@ class StyleGanDriver(IDriver):
             z: np.ndarray = None,
             label_id=None,
             trunc: float = 1,
-            translate: Tuple[float, float] = (0, 0),
-            rotate: float = 0,
-            noise_mode='const',
+            translate: Tuple[float, float] = (0, 0),  # Only for config-t and config-r. Ignored on other configurations.
+            rotate: float = 0,  # Only for config-t and config-r. Ignored on other configurations.
+            noise_mode='const',  # 'const', 'random', 'none'
             **kwargs
     ):
         # Labels

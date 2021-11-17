@@ -10,11 +10,11 @@ class IDriver:
             self,
             path: str,  # Path to network (local file or URL)
             z_dim: int,  # Input (z) vector dimension (e.g. 512 for StyleGan neworks)
-            is_conditional=False  # Indicates whether the network is conditional or not
+            c_dim: int = 0  # Number of conditional labels (0 = non-conditional network)
     ):
         self.path = path
         self.z_dim = z_dim
-        self.is_conditional = is_conditional
+        self.c_dim = c_dim
 
     def seed_to_z(self, seed: int):
         """ Converts seed to vector in the z latent space """
@@ -23,10 +23,10 @@ class IDriver:
     def generate_image(
             self,
             z: np.ndarray,
-            label_id=None,  # Label for conditional networks (ignored on non-conditional)
+            label_id: int = None,  # Label for conditional networks (ignore on non-conditional)
             trunc: float = 1,
-            translate: Tuple[float, float] = (0, 0),
-            rotate: float = 0,
+            translate: Tuple[float, float] = (0, 0),  # Ignore if network doesn't support translation
+            rotate: float = 0,  # Ignore if network doesn't support rotation
             noise_mode='const',  # 'const', 'random', 'none'
             ** kwargs  # Allow passing additional specific parameters
     ):
