@@ -32,8 +32,7 @@ class StyleGanDriver(IDriver):
         super().__init__(
             path=path,
             z_dim=self.G.z_dim,
-            c_dim=self.G.c_dim,
-            is_conditional=(self.G.c_dim != 0)
+            c_dim=self.G.c_dim
         )
 
     def generate_image(
