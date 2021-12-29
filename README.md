@@ -3,22 +3,23 @@ Ganimator (GAN Animator) is python library to generate beautyfull videos from St
 
 ## Still in development...
 
-## Hello world
-```
-import ganimator
+# TODO
+- driver for TensorFlow versions of Stylegan
+- documentation
+- Colab Notebook with examples
+- InterpolationClip
 
-gan = 
-asd
-```
+# Drivers - connecting to GANs
 
+Ganimator has curently two drivers:
+- StyleGanTfDriver
+- StyleGanPyDriver
 
+Note: Although Ganimator was created mainly for StyleGan, its driver-based architecture supports connection to any image GAN in the future.
 # Clips
-
-|feature                  |StyleGanPy|StyleGanTf|Rosinality|
-|-------------------------|:--------:|:--------:|:--------:|
-|StaticImageClip          | &#10004; |          |          |
-|LatentWalkClip           | &#10004; |          |          |
-|InterpolationClip        |          |          |          |
-|TruncComparisonClip      |          |          |          |
-
-
+|                         |StyleGanPy|StyleGanTf|
+|-------------------------|:--------:|:--------:|
+|StaticImageClip          | &#10004; | TODO     |
+|LatentWalkClip           | &#10004; | TODO     |
+|InterpolationClip        | TODO     | TODO     |
+|TruncComparisonClip      | &#10004; | TODO     |

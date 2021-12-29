@@ -7,7 +7,7 @@ import legacy
 from . import IDriver
 
 
-class StyleGanDriver(IDriver):
+class StyleGanPyDriver(IDriver):
     """
     This driver connects Ganimator to StyleGan networks based on the original Nvidia implementations.
 

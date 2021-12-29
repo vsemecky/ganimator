@@ -4,10 +4,10 @@ import numpy as np
 import PIL.Image
 import torch
 import legacy
-from . import StyleGanDriver
+from . import StyleGanPyDriver
 
 
-class StyleGanDriverFun(StyleGanDriver):
+class StyleGanDriverFun(StyleGanPyDriver):
     """
     Experiment
     """
