@@ -1,9 +1,10 @@
 import pickle
 import numpy as np
-import sys
 from . import IDriver
 
-sys.path.append("./submodules/stylegan2-ada/")
+# import sys
+# sys.path.append("./submodules/stylegan2-ada/")
+
 import dnnlib
 import dnnlib.tflib as tflib
 
@@ -18,13 +19,14 @@ class StyleGanTfDriver(IDriver):
         - including non-square networks trained using SkyFlyNill/StyleGan2 or RoyWheels/StyleGan2-Ada
     """
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, cache_dir: str = None):
         """
         Loads network into memory
         :type path: str Path to pkl file (local file or URL)
         """
         self.output_transform = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
-        with open(path, 'rb') as stream:
+        # with open(path, 'rb') as stream:
+        with dnnlib.util.open_url(path, cache_dir=cache_dir) as stream:
             print(f'Loading network from {path}')
             _G, _D, self.Gs = pickle.load(stream, encoding='latin1')
 
