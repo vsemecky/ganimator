@@ -29,16 +29,20 @@ class StyleGanTfDriver(IDriver):
         self.output_transform = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
         # with open(path, 'rb') as stream:
         with dnnlib.util.open_url(path, cache_dir=cache_dir) as stream:
-            print(f'Loading network from {path}')
             _G, _D, self.Gs = pickle.load(stream, encoding='latin1')
-            # debug
-            self.Gs.print_layers()
-            print("max_label_size:", self.Gs.input_shapes[1][-1])
-            print("input shapes:", self.Gs.input_shapes)
-            print("output_shape:", self.Gs.output_shape)
-            print("vars:", self.Gs.vars)
 
-        super().__init__(path=path, z_dim=self.Gs.z_dim, c_dim=self.Gs.c_dim)
+            # Gs structure
+            # self.Gs.print_layers()
+            print("max_label_size:", self.Gs.input_shapes[1][-1])
+            # print("input shapes:", self.Gs.input_shapes)
+            # print("output_shape:", self.Gs.output_shape)
+            # print("vars:", self.Gs.vars)
+            z_dim = self.Gs.input_shapes[0, 1]
+            c_dim = self.Gs.input_shapes[1, 1]
+            print("z_dim", z_dim)
+            print("c_dim", c_dim)
+
+        super().__init__(path=path, z_dim=z_dim, c_dim=c_dim)
 
     def generate_image(
             self,
