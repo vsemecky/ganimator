@@ -34,11 +34,10 @@ class StyleGanTfDriver(IDriver):
             # Gs structure
             # self.Gs.print_layers()
             print("max_label_size:", self.Gs.input_shapes[1][-1])
-            # print("input shapes:", self.Gs.input_shapes)
-            # print("output_shape:", self.Gs.output_shape)
-            # print("vars:", self.Gs.vars)
-            z_dim = self.Gs.input_shapes[0, 1]
-            c_dim = self.Gs.input_shapes[1, 1]
+            print("input shapes:", self.Gs.input_shapes)
+            print("output_shape:", self.Gs.output_shape)
+            z_dim = self.Gs.input_shapes[0][1]
+            c_dim = self.Gs.input_shapes[1][1]
             print("z_dim", z_dim)
             print("c_dim", c_dim)
 
