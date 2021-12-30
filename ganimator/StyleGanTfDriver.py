@@ -24,6 +24,8 @@ class StyleGanTfDriver(IDriver):
         Loads network into memory
         :type path: str Path to pkl file (local file or URL)
         """
+        dnnlib.tflib.init_tf()
+
         self.output_transform = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
         # with open(path, 'rb') as stream:
         with dnnlib.util.open_url(path, cache_dir=cache_dir) as stream:
