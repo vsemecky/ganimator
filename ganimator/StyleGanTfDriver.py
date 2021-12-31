@@ -51,6 +51,7 @@ class StyleGanTfDriver(IDriver):
             **kwargs
     ):
         tflib.init_tf()
+        z = np.expand_dims(z, axis=0)  # shape [512] => [512x1]
         image_np = self.Gs.run(
             z,
             None,
