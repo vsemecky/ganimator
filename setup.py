@@ -13,5 +13,7 @@ setuptools.setup(
     url='https://github.com/vsemecky/ganimator',
     license='MIT',
     packages=setuptools.find_packages(),
+    package_data={'': ['**/*.cu']},
+    include_package_data=True,
     install_requires=requirements,
 )
