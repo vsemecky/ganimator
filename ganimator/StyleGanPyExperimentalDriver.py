@@ -7,7 +7,7 @@ import legacy
 from . import StyleGanPyDriver
 
 
-class StyleGanDriverFun(StyleGanPyDriver):
+class StyleGanPyExperimentalDriver(StyleGanPyDriver):
     """
     Experiment
     """
@@ -22,7 +22,7 @@ class StyleGanDriverFun(StyleGanPyDriver):
         self.ratio = ratio
         super().__init__(path=path, cache_dir=cache_dir)
         if not hasattr(self.G.synthesis, 'input'):
-            raise ValueError("Only 'config-t' a 'config-r' are supported by StyleGanDriverFun.")
+            raise ValueError("Only 'config-t' a 'config-r' are supported by StyleGanPyExperimentalDriver.")
 
     def generate_image(
             self,
