@@ -12,13 +12,11 @@ class StyleGanPyDriver(IDriver):
     This driver connects Ganimator to StyleGan networks based on the original Nvidia implementations.
 
     Supported networks:
-        - StyleGan, StyleGan2, StyleGan2-Ada, StyleGan3
-        - both Tensorflow and PyTorch implementations
-        - including StyleGan trained in RunwayML
-        - including non-square networks trained using SkyFlyNill/StyleGan2 or RoyWheels/StyleGan2-Ada
+        - StyleGan2-Ada-Pytorch
+        - StyleGan3
     """
 
-    def __init__(self, path: str, cache_dir: str = None):
+    def __init__(self, path: str, cache_dir: str = None, anamorphic: Tuple[int, int] = None):
         """
         Loads network into memory
         :type path: str Filename or URL
@@ -26,6 +24,7 @@ class StyleGanPyDriver(IDriver):
         """
         print(f'Loading networks from {path}')
         self.device = torch.device('cuda')
+        self.anamorphic = anamorphic
         with dnnlib.util.open_url(path, cache_dir=cache_dir) as f:
             self.G = legacy.load_network_pkl(f)['G_ema'].to(self.device)
 
@@ -61,7 +60,14 @@ class StyleGanPyDriver(IDriver):
         z_tensor = torch.from_numpy(z).to(self.device)  # np.ndarray => torch.Tensor
         img = self.G(z_tensor, label, truncation_psi=trunc, noise_mode=noise_mode)  # Generate image
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)  # Some magic (???)
-        return img[0].cpu().numpy()
+        img = img[0].cpu().numpy()
+
+        # If anamorphic, apply reverse process (resize image from square to original anamorphic size)
+        if self.anamorphic:
+            img_pil = PIL.Image.fromarray(img).resize(self.anamorphic, resample=PIL.Image.LANCZOS)
+            img = np.array(img_pil)
+
+        return img
 
     @staticmethod
     def _make_transform_matrix(translate: Tuple[float, float], rotate: float) -> torch.Tensor:
