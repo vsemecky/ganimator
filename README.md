@@ -1,7 +1,11 @@
-# Ganimator
+# Ganimator (Still in development...)
 Ganimator (GAN Animator) is python library to generate beautyfull videos from StyleGan networks. It combines the power of **StyleGan** and **MoviePy**.
 
-## Still in development...
+# Installation
+
+```
+pip install git+https://github.com/vsemecky/ganimator.git
+```
 
 # TODO
 - driver for TensorFlow versions of Stylegan
