@@ -1,8 +1,3 @@
-import sys
-
-# Allow import from git submodules
-# sys.path.append("./submodules/stylegan2-ada/")
-
 import glob
 import re
 import scipy
@@ -48,7 +43,7 @@ class LatentWalkClip(VideoClip):
             trunc: float = 1.0,
             smoothing_sec: float = 1.0,
             title=None,
-            title_font_size=None,
+            title_font_size=None
     ):
         num_frames = duration * fps
         random_state = np.random.RandomState(seed)
@@ -64,6 +59,16 @@ class LatentWalkClip(VideoClip):
             frame_idx = int(np.clip(np.round(t * fps), 0, num_frames - 1))
             latents = all_latents[frame_idx]
             image_np = gan.generate_image(latents, trunc=trunc, label_id=label_id)
+
+            if title is not None:  # Append title text
+                height = image_np.shape[0]
+                font_size = title_font_size or height // 32
+                title_font = get_image_font(family='sans-serif', weight='normal', size=font_size)
+                pil_image = Image.fromarray(image_np)
+                draw = ImageDraw.Draw(pil_image, 'RGBA')  # RGBA because of semitransparent rectangle arount the title
+                draw_text(draw=draw, image=pil_image, font=title_font, text=title, gravity="South", fill=(0, 0, 0, 200), margin=height // 64, padding=font_size // 5)
+                image_np = np.array(pil_image)
+
             return image_np
 
         # Create VideoClip
