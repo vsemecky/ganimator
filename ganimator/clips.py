@@ -1,5 +1,3 @@
-import glob
-import re
 import scipy
 from .functions import *
 
@@ -70,61 +68,6 @@ class LatentWalkClip(VideoClip):
                 image_np = np.array(pil_image)
 
             return image_np
-
-        # Create VideoClip
-        super().__init__(make_frame=make_frame, duration=duration)
-
-
-class InterpolationClip(VideoClip):
-    """ Generates interpolation video between seeds """
-
-    def __init__(
-            self,
-            pkl: str,
-            duration: int = None,
-            step_duration: int = 3,
-            seeds: list = [1, 2, 3],
-            trunc: float = 1.0,
-            randomize_noise: bool = False,
-            fps: int = 30
-    ):
-        if duration is None:
-            duration = step_duration * (len(seeds) - 1)
-
-        tflib.init_tf()
-        Gs = load_network_Gs(pkl)
-
-        noise_vars = [var for name, var in Gs.components.synthesis.vars.items() if name.startswith('noise')]
-
-        zs = generate_zs_from_seeds(seeds, Gs)
-
-        num_frames = int(np.rint(duration * fps))
-        number_of_steps = int(num_frames / (len(zs) - 1)) +1  # todo Prejmenovat na num_steps nebo steps_count/frames_count
-        points = line_interpolate(zs, number_of_steps)
-
-        Gs_kwargs = dnnlib.EasyDict()
-        Gs_kwargs.output_transform = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
-        Gs_kwargs.randomize_noise = randomize_noise
-        Gs_kwargs.truncation_psi = trunc
-
-        # Frame generation func for moviepy
-        def make_frame(t):
-            frame_idx = int(np.clip(np.round(t * fps), 0, num_frames - 1))
-
-            # TIP: Oddebugovat run_generator,  co mu sem leze, zejmena len(zx)
-            z_idx = frame_idx
-            z = points[z_idx]
-
-            # Puvodni loop
-            if isinstance(z, list):
-                z = np.array(z).reshape(1, 512)
-            elif isinstance(z, np.ndarray):
-                z.reshape(1, 512)
-
-            noise_rnd = np.random.RandomState(1)  # fix noise
-            tflib.set_vars({var: noise_rnd.randn(*var.shape.as_list()) for var in noise_vars})  # [height, width]
-            images = Gs.run(z, None, **Gs_kwargs)  # [minibatch, height, width, channel]
-            return images[0]
 
         # Create VideoClip
         super().__init__(make_frame=make_frame, duration=duration)

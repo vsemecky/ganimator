@@ -115,11 +115,11 @@ def line_interpolate(zs, steps):
 def generate_image(
         gan: IDriver,
         seed: int = 42,
-        label_id=None,
+        label_id: int = None,
         trunc: float = 1,
         translate: Tuple[float, float] = (0, 0),
         rotate: float = 0,
-        noise_mode='const'  # 'const', 'random', 'none'
+        noise_mode: str = 'const'  # 'const', 'random', 'none'
         ) -> PIL.Image:
     z = gan.seed_to_z(seed)
     image_np = gan.generate_image(z, label_id=label_id, trunc=trunc, translate=translate, rotate=rotate, noise_mode=noise_mode)
@@ -128,7 +128,7 @@ def generate_image(
 
 
 # Finds the latest pkl file in the `folder`. Returns tuple (file path, kimg number)
-def locate_latest_pkl(folder: str):
+def locate_latest_pkl(folder: str) -> Tuple[str, int]:
     allpickles = sorted(glob.glob(os.path.join(folder, '0*', 'network-*.pkl')))
     latest_pkl = allpickles[-1]
     re_kimg = re.compile('network-snapshot-(\d+).pkl')
