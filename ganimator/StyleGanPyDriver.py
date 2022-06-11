@@ -9,11 +9,16 @@ from . import IDriver
 
 class StyleGanPyDriver(IDriver):
     """
-    This driver connects Ganimator to StyleGan networks based on the original Nvidia implementations.
+    The driver connects Ganimator to Pytorch versions of StyleGan
 
     Supported networks:
         - StyleGan2-Ada-Pytorch
         - StyleGan3
+        - Legacy support: most of StyleGan2/StyleGan2-Ada networks TensorFlow edition
+
+    Note: Due to legacy support, the driver can also load most of the networks from older Tensorflow StyleGan implementations.
+    If you have problem with loading older networks, try StyleGanTfDriver() instead, which should load all networks
+    from Tensorflow StyleGan implementations.
     """
 
     def __init__(self, path: str, cache_dir: str = None, anamorphic: Tuple[int, int] = None):
@@ -28,10 +33,17 @@ class StyleGanPyDriver(IDriver):
         with dnnlib.util.open_url(path, cache_dir=cache_dir) as f:
             self.G = legacy.load_network_pkl(f)['G_ema'].to(self.device)
 
+        if anamorphic:
+            width, height = anamorphic
+        else:
+            width = height = self.G.img_resolution
+
         super().__init__(
             path=path,
             z_dim=self.G.z_dim,
-            c_dim=self.G.c_dim
+            c_dim=self.G.c_dim,
+            width=width,
+            height=height,
         )
 
     def generate_image(
@@ -64,6 +76,8 @@ class StyleGanPyDriver(IDriver):
 
         # If anamorphic, apply reverse process (resize image from square to original anamorphic size)
         if self.anamorphic:
+            # @todo neprevadet na PIL a zpet, zkusit resize z OpenCv
+            # img = cv2.resize(img, dsize=self.anamorphic, interpolation=cv2.INTER_LANCZOS4)
             img_pil = PIL.Image.fromarray(img).resize(self.anamorphic, resample=PIL.Image.LANCZOS)
             img = np.array(img_pil)
 
@@ -72,7 +86,7 @@ class StyleGanPyDriver(IDriver):
     @staticmethod
     def _make_transform_matrix(translate: Tuple[float, float], rotate: float) -> torch.Tensor:
         """
-        Construct an rotation/translation matrix to pass to the generator.
+        Construct a rotation/translation matrix to pass to the generator.
         The generator expects this matrix as an inverse to avoid potentially failing
         numerical operations in the network.
         """

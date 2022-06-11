@@ -9,10 +9,14 @@ class IDriver:
     def __init__(
             self,
             path: str,  # Path to network (local file or URL)
+            width: int,  # Output image width
+            height: int,  # Output image height
             z_dim: int,  # Input (z) vector dimension (e.g. 512 for StyleGan neworks)
             c_dim: int = 0  # Number of conditional labels (0 = non-conditional network)
     ):
         self.path = path
+        self.width = width
+        self.height = height
         self.z_dim = z_dim
         self.c_dim = c_dim
 
