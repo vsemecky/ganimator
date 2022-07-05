@@ -6,7 +6,7 @@ sys.path.append(ganimator_dir)
 
 from . import functions
 from .IDriver import IDriver
-from .StyleGanTfDriver import StyleGanTfDriver
+# from .StyleGanTfDriver import StyleGanTfDriver
 from .StyleGanPyDriver import StyleGanPyDriver
 from .StyleGanPyExperimentalDriver import StyleGanPyExperimentalDriver
 from .clips import *
