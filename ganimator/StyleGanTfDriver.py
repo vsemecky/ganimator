@@ -1,9 +1,12 @@
 import pickle
 import numpy as np
 from . import IDriver
-
 import dnnlib
-import dnnlib.tflib as tflib
+
+try:
+    import dnnlib.tflib as tflib
+except:
+    print("TensorFlow 1.x not installed. StyleGanTfDriver disabled")
 
 
 class StyleGanTfDriver(IDriver):
