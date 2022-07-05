@@ -1,9 +1,7 @@
 import pickle
 import numpy as np
 from . import IDriver
-
 import dnnlib
-import dnnlib.tflib as tflib
 
 
 class StyleGanTfDriver(IDriver):
@@ -21,8 +19,12 @@ class StyleGanTfDriver(IDriver):
         Loads network into memory
         :type path: str Path to pkl file (local file or URL)
         """
-        dnnlib.tflib.init_tf()
-        self.output_transform = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
+        try:
+            dnnlib.tflib.init_tf()
+        except:
+            raise ImportError("StyleGanTfDriver requires TensorFlow 1.x and it's not installed. In Colab use anotation '%tensorflow_version 1.x'")
+
+        self.output_transform = dict(func=dnnlib.tflib.convert_images_to_uint8, nchw_to_nhwc=True)
 
         with dnnlib.util.open_url(path, cache_dir=cache_dir) as stream:
             _G, _D, self.Gs = pickle.load(stream, encoding='latin1')
@@ -41,7 +43,7 @@ class StyleGanTfDriver(IDriver):
             noise_mode: str = 'const',  # 'const', 'random', 'none'
             **kwargs
     ):
-        tflib.init_tf()
+        dnnlib.tflib.init_tf()
         z = np.expand_dims(z, axis=0)  # shape [512] => [512x1]
         image_np = self.Gs.run(
             z,
