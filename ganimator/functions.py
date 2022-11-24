@@ -129,7 +129,8 @@ def generate_image(
 
 # Finds the latest pkl file in the `folder`. Returns tuple (file path, kimg number)
 def locate_latest_pkl(folder: str) -> Tuple[str, int]:
-    allpickles = sorted(glob.glob(os.path.join(folder, '0*', 'network-*.pkl')))
+    glob_path = os.path.join(folder, '**', 'network-*.pkl')
+    allpickles = sorted(glob.glob(glob_path, recursive=True))
     latest_pkl = allpickles[-1]
     re_kimg = re.compile('network-snapshot-(\d+).pkl')
     latest_kimg = int(re_kimg.match(os.path.basename(latest_pkl)).group(1))
