@@ -4,7 +4,7 @@ requirements = open('requirements.txt').read().splitlines()
 
 setuptools.setup(
     name='ganimator',
-    version='0.0.1',
+    version='0.0.2',
     author='Vojtěch Semecký',
     author_email='vojtech@semecky.cz',
     description='GAN Animator - library to generate videos and images from GAN neural networks',
@@ -13,7 +13,7 @@ setuptools.setup(
     url='https://github.com/vsemecky/ganimator',
     license='MIT',
     packages=setuptools.find_packages(),
-    package_data={'': ['**/*.cu']},
+    package_data = {"ganimator": ["dnnlib/**/*", "torch_utils/**/*"]},
     include_package_data=True,
     install_requires=requirements,
 )
